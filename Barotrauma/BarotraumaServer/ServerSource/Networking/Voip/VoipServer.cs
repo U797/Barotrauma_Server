@@ -120,7 +120,7 @@ namespace Barotrauma.Networking
                 //otherwise do a distance check
                 float garbleAmount = ChatMessage.GetGarbleAmount(recipient.Character, sender.Character, ChatMessage.SpeakRangeVOIP);
                 distanceFactor = garbleAmount;
-                return garbleAmount < 1.0f;
+                return garbleAmount < 0.35f;
             }
         }
     }
