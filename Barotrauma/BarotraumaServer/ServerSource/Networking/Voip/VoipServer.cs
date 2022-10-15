@@ -113,7 +113,7 @@ namespace Barotrauma.Networking
             {
                 if (recipient.SpectatePos == null) { return true; }
                 distanceFactor = MathHelper.Clamp(Vector2.Distance(sender.Character.WorldPosition, recipient.SpectatePos.Value) / ChatMessage.SpeakRangeVOIP, 0.0f, 1.0f);
-                return distanceFactor < 1.0f;
+                return distanceFactor < 0.35f;
             }
             else
             {
