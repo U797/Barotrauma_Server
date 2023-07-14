@@ -658,7 +658,7 @@ namespace Barotrauma.Networking
             set;
         }
 
-        [Serialize(false, IsPropertySaveable.Yes)]
+        [Serialize(true, IsPropertySaveable.Yes)] //[Serialize(false, IsPropertySaveable.Yes)]
         public bool AllowRewiring
         {
             get;
