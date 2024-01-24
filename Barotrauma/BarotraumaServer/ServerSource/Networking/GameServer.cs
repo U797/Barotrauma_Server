@@ -2563,6 +2563,29 @@ namespace Barotrauma.Networking
 
             roundStartTime = DateTime.Now;
 
+            // === EXTENSION ===
+            // NOTE: Do this AFTER characters haven been loaded!
+            Console.WriteLine($"Creating attendance file for {connectedClients.Count} clients");
+            using (System.IO.StreamWriter outputFile = new System.IO.StreamWriter("./attendance.txt", append: true))
+            {
+                // Write header information
+                var nowString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                outputFile.WriteLine($"*****START-{nowString}*****");
+
+                // Write character names to file
+                foreach (var client in connectedClients)
+                {
+                    if (client.CharacterInfo != null)
+                    {
+                        outputFile.WriteLine($"{client.CharacterInfo.DisplayName}");
+                    }
+                }
+
+                // Empty line for formatting reasons
+                outputFile.WriteLine("");
+            }
+            // === EXTENSION END ===
+
             startGameCoroutine = null;
             yield return CoroutineStatus.Success;
         }
@@ -2698,6 +2721,29 @@ namespace Barotrauma.Networking
         {
             if (GameStarted)
             {
+                // === EXTENSION ===
+                // Write name of all characters to file
+                Console.WriteLine($"Creating attendance file for {connectedClients.Count} clients");
+                using (System.IO.StreamWriter outputFile = new System.IO.StreamWriter("./attendance.txt", append: true))
+                {
+                    // Write header information
+                    var nowString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                    outputFile.WriteLine($"*****END-{nowString}*****");
+
+                    // Write character names to file
+                    foreach (var client in connectedClients)
+                    {
+                        if (client.CharacterInfo != null)
+                        {
+                            outputFile.WriteLine(client.CharacterInfo.DisplayName);
+                        }
+                    }
+
+                    // Empty line for formatting reasons
+                    outputFile.WriteLine("");
+                }
+                // === EXTENSION END ===
+
                 if (GameSettings.CurrentConfig.VerboseLogging)
                 {
                     Log("Ending the round...\n" + Environment.StackTrace.CleanupStackTrace(), ServerLog.MessageType.ServerMessage);
