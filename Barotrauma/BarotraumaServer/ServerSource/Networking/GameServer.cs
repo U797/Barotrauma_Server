@@ -756,6 +756,10 @@ namespace Barotrauma.Networking
                     ClientReadIngame(inc);
                     break;
                 case ClientPacketHeader.CAMPAIGN_SETUP_INFO:
+                    // === EXTENSION ===
+                    // Create info file here?
+                    Console.WriteLine("WOULD CREATE ATTENDANCE FILE");
+                    // === EXTENSION END ===
                     bool isNew = inc.ReadBoolean(); inc.ReadPadBits();
                     if (isNew)
                     {
@@ -2116,6 +2120,7 @@ namespace Barotrauma.Networking
 
         public bool TryStartGame()
         {
+            Console.WriteLine("TRY START GAME");
             if (initiatedStartGame || GameStarted) { return false; }
 
             GameModePreset selectedMode = 
