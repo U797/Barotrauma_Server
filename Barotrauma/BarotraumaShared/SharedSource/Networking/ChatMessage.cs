@@ -30,13 +30,13 @@ namespace Barotrauma.Networking
 
         public const int MaxMessagesPerPacket = 10;
 
-        public const float SpeakRange = 2000.0f;
+        public const float SpeakRange = 1000.0f;
 
         /// <summary>
         /// This is shorter than the text chat speak range, because the voice chat is still intelligible (just quiet) close to the maximum range,
         /// while the text chat (which drops letters from the message) becomes unintelligible sooner
         /// </summary>
-        public const float SpeakRangeVOIP = 1000.0f;
+        public const float SpeakRangeVOIP = 500.0f;
 
         private static readonly string dateTimeFormatLongTimePattern = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
 
