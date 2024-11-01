@@ -2708,20 +2708,25 @@ namespace Barotrauma
                     
                     if (newTeamPreference == CharacterTeamType.None
                         && GameMain.Client?.ServerSettings?.PvpTeamSelectionMode == PvpTeamSelectionMode.PlayerChoice) { return false; } // Already handled by delegate above 
-                    
+
+                    var oldPreference = MultiplayerPreferences.Instance.TeamPreference;
+
                     MultiplayerPreferences.Instance.TeamPreference = newTeamPreference;
                     
                     UpdateSelectedSub(newTeamPreference);
-                    GameMain.Client?.ForceNameJobTeamUpdate();
+                    if (newTeamPreference != oldPreference)
+                    {
+                        GameMain.Client?.ForceNameJobTeamUpdate();
+                        GameSettings.SaveCurrentConfig();
+                    }
                     RefreshPvpTeamSelectionButtons();
-                    GameSettings.SaveCurrentConfig();
                     UpdateDisembarkPointListFromServerSettings();
                     //need to update job preferences and close the selection frame
                     //because the team selection might affect the uniform sprite and the loadouts
                     UpdateJobPreferences(GameMain.Client?.CharacterInfo ?? Character.Controlled?.Info);
                     JobSelectionFrame = null;
                     RefreshChatrow(); // to enable/disable team chat according to current selection
-                    
+
                     return true;
                 };
 
@@ -4015,7 +4020,9 @@ namespace Barotrauma
                 JobSelectionFrame.Visible = false;
             }
 
-            if (GUI.MouseOn?.UserData is JobVariant jobPrefab && GUI.MouseOn.Style?.Name == "JobVariantButton")
+            if (GUI.MouseOn?.UserData is JobVariant jobPrefab && 
+                GUI.MouseOn.Style?.Name == "JobVariantButton" &&
+                GUI.MouseOn.Parent != null)
             {
                 if (jobVariantTooltip?.UserData is not JobVariant prevVisibleVariant || 
                     prevVisibleVariant.Prefab != jobPrefab.Prefab || 
@@ -4765,19 +4772,29 @@ namespace Barotrauma
             {
                 TeamChatSelected = false;
             }
-            
-            chatInput = new GUITextBox(new RectTransform(new Vector2(0.75f, 1.0f), chatRow.RectTransform, Anchor.CenterRight))
-            {
-                MaxTextLength = ChatMessage.MaxLength,
-                Font = GUIStyle.SmallFont,
-                DeselectAfterMessage = false
-            };
 
-            micIcon = new GUIImage(new RectTransform(new Vector2(0.05f, 1.0f), chatRow.RectTransform), style: "GUIMicrophoneUnavailable");
-            
-            chatInput.Select();
+            if (chatInput != null)
+            {
+                chatInput.RectTransform.Parent = chatRow.RectTransform;
+            }
+            else
+            {
+                chatInput = new GUITextBox(new RectTransform(new Vector2(0.75f, 1.0f), chatRow.RectTransform, Anchor.CenterRight))
+                {
+                    MaxTextLength = ChatMessage.MaxLength,
+                    Font = GUIStyle.SmallFont,
+                    DeselectAfterMessage = false
+                };
+
+                micIcon = new GUIImage(new RectTransform(new Vector2(0.05f, 1.0f), chatRow.RectTransform), style: "GUIMicrophoneUnavailable");
+                chatInput.Select();
+            }
+
+            //this needs to be done even if we're using the existing chatinput instance instead of creating a new one,
+            //because the client might not have existed when the input box was first created
             if (GameMain.Client != null)
             {
+                chatInput.ResetDelegates();
                 chatInput.OnEnterPressed = GameMain.Client.EnterChatMessage;
                 chatInput.OnTextChanged += GameMain.Client.TypingChatMessage;
                 chatInput.OnDeselected += (sender, key) =>

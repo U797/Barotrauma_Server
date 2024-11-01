@@ -850,7 +850,8 @@ namespace Barotrauma.Items.Components
 
         private bool CanAutoInteractWithContained(Item containedItem)
         {
-            return AutoInteractWithContained && autoInteractWithContainedTags.Any(t => containedItem.HasTag(t));
+            return AutoInteractWithContained && 
+                (autoInteractWithContainedTags.None() || autoInteractWithContainedTags.Any(t => containedItem.HasTag(t)));
         }
 
         private void SetContainedActive(bool active)
@@ -1159,7 +1160,7 @@ namespace Barotrauma.Items.Components
                 foreach (string id in splitIds)
                 {
                     ItemPrefab prefab = ItemPrefab.Prefabs.Find(m => m.Identifier == id);
-                    if (prefab != null && Inventory != null && Inventory.CanBePut(prefab))
+                    if (prefab != null && Inventory != null && Inventory.CanProbablyBePut(prefab))
                     {
                         bool isEditor = false;
 #if CLIENT
