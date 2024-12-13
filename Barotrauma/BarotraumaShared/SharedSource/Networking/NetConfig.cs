@@ -8,7 +8,7 @@ namespace Barotrauma.Networking
         public const int DefaultPort = 27015;
         public const int DefaultQueryPort = 27016;
 
-        public const int MaxPlayers = 19;
+        public const int MaxPlayers = 22;
 
         public const int ServerNameMaxLength = 60;
         public const int ServerMessageMaxLength = 2000;
