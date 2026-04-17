@@ -827,9 +827,21 @@ namespace Barotrauma
                 }
             }
 
+            float modifiedStrength = newAffliction.Strength * (100.0f / MaxVitality) * (1f - GetResistance(newAffliction.Prefab, limbType));
+            if (newAffliction.Prefab.AfflictionType == AfflictionPrefab.StunType)
+            {
+                //don't allow stunning for less than one frame
+                //fixes monsters/enemies that take some minuscule amount of stun from a weapon still being noticeable affected by the stun, 
+                //because even a one-frame stun briefly disables the animations and makes the character stop
+                if (modifiedStrength < Timing.Step && Stun <= 0.0f)
+                {
+                    return;
+                }
+            }
+
             if (existingAffliction != null)
             {
-                float newStrength = newAffliction.Strength * (100.0f / MaxVitality) * (1f - GetResistance(existingAffliction.Prefab, limbType));
+                float newStrength = modifiedStrength;
                 if (allowStacking)
                 {
                     // Add the existing strength
@@ -851,7 +863,7 @@ namespace Barotrauma
             //create a new instance of the affliction to make sure we don't use the same instance for multiple characters
             //or modify the affliction instance of an Attack or a StatusEffect
             var copyAffliction = newAffliction.Prefab.Instantiate(
-                Math.Min(newAffliction.Prefab.MaxStrength, newAffliction.Strength * (100.0f / MaxVitality) * (1f - GetResistance(newAffliction.Prefab, limbType))),
+                Math.Min(newAffliction.Prefab.MaxStrength, modifiedStrength),
                 newAffliction.Source);
             afflictions.Add(copyAffliction, limbHealth);
             AchievementManager.OnAfflictionReceived(copyAffliction, Character);

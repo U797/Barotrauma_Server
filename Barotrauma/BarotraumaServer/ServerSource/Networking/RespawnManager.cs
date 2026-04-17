@@ -582,6 +582,23 @@ namespace Barotrauma.Networking
                         teamSpecificState.RespawnItems.AddRange(AutoItemPlacer.RegenerateLoot(respawnShuttle, respawnContainer));
                     }
                 }
+                else if (character.InWater)
+                {
+                    if (divingSuitPrefab != null)
+                    {
+                        var divingSuit = new Item(divingSuitPrefab, character.Position, respawnSub);
+                        Spawner.CreateNetworkEvent(new EntitySpawner.SpawnEntity(divingSuit));
+                        character.Inventory.TryPutItem(divingSuit, user: null, allowedSlots: divingSuit.AllowedSlots);
+                        teamSpecificState.RespawnItems.Add(divingSuit);
+                        if (oxyPrefab != null && divingSuit.GetComponent<ItemContainer>() != null)
+                        {
+                            var oxyTank = new Item(oxyPrefab, character.Position, respawnSub);
+                            Spawner.CreateNetworkEvent(new EntitySpawner.SpawnEntity(oxyTank));
+                            divingSuit.Combine(oxyTank, user: null);
+                            teamSpecificState.RespawnItems.Add(oxyTank);
+                        }
+                    }
+                }
 
                 var characterData = campaign?.GetClientCharacterData(clients[i]);
                 // NOTE: This was where Reaper's tax got applied

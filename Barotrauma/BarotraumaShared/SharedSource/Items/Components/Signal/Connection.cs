@@ -27,6 +27,11 @@ namespace Barotrauma.Items.Components
             private init => _displayName = value;
         }
 
+        /// <summary>
+        /// Display name ignoring <see cref="DisplayNameOverride"/>
+        /// </summary>
+        public LocalizedString DefaultDisplayName => _displayName;
+
         public LocalizedString DisplayNameOverride;
 
         private readonly HashSet<Wire> wires;

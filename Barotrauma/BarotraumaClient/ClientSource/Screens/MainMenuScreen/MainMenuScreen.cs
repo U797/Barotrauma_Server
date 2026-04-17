@@ -49,6 +49,9 @@ namespace Barotrauma
         private GUITextBox serverNameBox, passwordBox, maxPlayersBox;
         private GUITickBox isPublicBox, wrongPasswordBanBox, karmaBox;
         private GUIDropDown languageDropdown, serverExecutableDropdown;
+#if DEBUG
+        private GUITickBox lenientHandshakeBox;
+#endif
         private readonly GUIButton joinServerButton, hostServerButton;
 
         private readonly GUIFrame modsButtonContainer;
@@ -1075,7 +1078,7 @@ namespace Barotrauma
                     "-public", isPublicBox.Selected.ToString(),
                     "-playstyle", ((PlayStyle)playstyleBanner.UserData).ToString(),
                     "-banafterwrongpassword", wrongPasswordBanBox.Selected.ToString(),
-                    "-karmaenabled", (!karmaBox.Selected).ToString(),
+                    "-karmaenabled", (karmaBox.Selected).ToString(),
                     "-maxplayers", maxPlayersBox.Text,
                     "-language", languageDropdown.SelectedData.ToString()
                 };
@@ -1114,6 +1117,13 @@ namespace Barotrauma
                 int ownerKey = Math.Max(CryptoRandom.Instance.Next(), 1);
                 arguments.Add("-ownerkey");
                 arguments.Add(ownerKey.ToString());
+#if DEBUG
+                if (lenientHandshakeBox.Selected)
+                {
+                    arguments.Add("-lenienthandshake");
+                    NetConfig.UseLenientHandshake = true;
+                }
+#endif
 
                 var processInfo = new ProcessStartInfo
                 {
@@ -1368,7 +1378,7 @@ namespace Barotrauma
             }
             int maxPlayers = Math.Clamp(maxPlayersElement, min: 1, max: NetConfig.MaxPlayers);
 
-            var karmaEnabled = serverSettings.GetAttributeBool("karmaenabled", true);
+            var karmaEnabled = serverSettings.GetAttributeBool("karmaenabled", false);
             var selectedPlayStyle = serverSettings.GetAttributeEnum("playstyle", PlayStyle.Casual);
 
             Vector2 textLabelSize = new Vector2(1.0f, 0.05f);
@@ -1579,9 +1589,17 @@ namespace Barotrauma
 
             karmaBox = new GUITickBox(new RectTransform(new Vector2(0.5f, 1.0f), tickboxAreaLower.RectTransform), TextManager.Get("HostServerKarmaSetting"))
             {
-                Selected = !karmaEnabled,
+                Selected = karmaEnabled,
                 ToolTip = TextManager.Get("hostserverkarmasettingtooltip")
             };
+
+#if DEBUG
+            lenientHandshakeBox = new GUITickBox(new RectTransform(new Vector2(0.5f, 1.0f), tickboxAreaLower.RectTransform), "DEBUG: Lenient server startup timeouts")
+            {
+                Selected = true,
+                ToolTip = "Start with more lenient Lidgren handshake timeouts. The server is more likely to start even when running multiple instances on the same machine under heavy load."
+            };
+#endif
 
             tickboxAreaLower.RectTransform.IsFixedSize = true;
 
@@ -1671,8 +1689,8 @@ namespace Barotrauma
             if (string.IsNullOrEmpty(remoteContentUrl)) { return; }
             try
             {
-                var client = new RestClient(remoteContentUrl);
-                var request = new RestRequest("MenuContent.xml", Method.GET);
+                var client = RestFactory.CreateClient(remoteContentUrl);
+                var request = RestFactory.CreateRequest("MenuContent.xml");
                 TaskPool.Add("RequestMainMenuRemoteContent", client.ExecuteAsync(request),
                     RemoteContentReceived);
             }
@@ -1693,12 +1711,17 @@ namespace Barotrauma
             try
             {
                 if (!t.TryGetResult(out IRestResponse remoteContentResponse)) { throw new Exception("Task did not return a valid result"); }
+                if (remoteContentResponse.ErrorException != null)
+                {
+                    DebugConsole.AddWarning($"Connection error: Failed to fetch remote main menu content " +
+                        $"({remoteContentResponse.ErrorException.Message}).");
+                    return;
+                }
                 if (remoteContentResponse.StatusCode != HttpStatusCode.OK)
                 {
                     DebugConsole.AddWarning(
                         "Failed to receive remote main menu content. " +
-                        "There may be an issue with your internet connection, or the master server might be temporarily unavailable " +
-                        $"(error code: {remoteContentResponse.StatusCode})");
+                        $"The master server might be temporarily unavailable (HTTP error: {remoteContentResponse.StatusCode})");
                     return;
                 }
                 string xml = remoteContentResponse.Content;

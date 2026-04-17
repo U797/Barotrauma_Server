@@ -66,6 +66,9 @@ namespace Barotrauma.Networking
                 txt = msg.ReadString() ?? "";
             }
 
+            // Sanitize incoming text message from client so they can't use RichString features
+            txt = txt.Replace('‖', ' ');
+
             if (!NetIdUtils.IdMoreRecent(ID, c.LastSentChatMsgID)) { return; }
 
             c.LastSentChatMsgID = ID;

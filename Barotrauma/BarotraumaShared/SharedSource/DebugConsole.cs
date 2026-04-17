@@ -3019,7 +3019,10 @@ namespace Barotrauma
                     switch (args[argIndex].ToLowerInvariant())
                     {
                         case "inside":
-                            spawnPoint = WayPoint.GetRandom(SpawnType.Human, job, Submarine.MainSub);
+                            spawnPoint = 
+                                WayPoint.GetRandom(SpawnType.Human, job, Submarine.MainSub) ??
+                                //try a non-job-specific spawnpoint if a job-specific one can't be found
+                                WayPoint.GetRandom(SpawnType.Human, assignedJob: null, Submarine.MainSub);
                             break;
                         case "outside":
                             spawnPoint = WayPoint.GetRandom(SpawnType.Enemy);

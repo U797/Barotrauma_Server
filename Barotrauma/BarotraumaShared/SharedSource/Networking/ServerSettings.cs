@@ -454,7 +454,7 @@ namespace Barotrauma.Networking
             private set;
         }
 
-        [Serialize(300.0f, IsPropertySaveable.Yes)]
+        [Serialize(30.0f, IsPropertySaveable.Yes)]
         public float RespawnInterval
         {
             get;
