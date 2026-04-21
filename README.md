@@ -1,6 +1,6 @@
 # Barotrauma
 
-Copyright © FakeFish Ltd 2017-2024
+Copyright © FakeFish Ltd 2017-2026
 
 Before downloading the source code, please read the [EULA](EULA.txt).
 
