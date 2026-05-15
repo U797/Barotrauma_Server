@@ -74,6 +74,7 @@ body:
       description: Which version of the game did the bug happen in? You can see the current version number in the bottom left corner of your screen in the main menu.
       options:
         - v1.12.6.2 (Spring Update 2026)
+        - Unstable v1.13.1.0
         - Other
     validations:
       required: true
